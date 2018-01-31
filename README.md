@@ -68,7 +68,8 @@ $ OCD_KEY=01234567890123456789012345678901 ./wnm/wnm_merge.py
 ### update log
 <details>
     <summary>Example output of the full updating process</summary>
-```
+
+```shell
 ========================================
 > updating AS names database
 ========================================
@@ -237,6 +238,7 @@ data to be processed 3
 
 > all done :) (102m 4s)
 ```
+
 </details>
 
 ## run server

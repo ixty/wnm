@@ -1,0 +1,6 @@
+[submodule "data"]
+	path = data
+	url = git@github.com:ixty/wnm_data.git
+[submodule "data-raw"]
+	path = data-raw
+	url = git@github.com:ixty/wnm_data_raw.git

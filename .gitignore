@@ -1,0 +1,4 @@
+venv
+pwui/*.pyc
+wnm/*.pyc
+
