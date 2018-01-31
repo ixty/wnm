@@ -1,0 +1,36 @@
+{% extends "map.html" %}
+
+{% from "tools.html" import flag_32             with context %}
+{% from "tools.html" import list_item_collapse  with context %}
+{% from "tools.html" import item_country2       with context %}
+{% from "tools.html" import item_cable          with context %}
+
+
+<!-- display info for an exchange -->
+{% block sidebar %}
+{% filter stripblock %}
+<div>
+    <h3>
+        <i class="flaticon-anchor"></i>
+        {{ flag_32(landing['cc']) }}
+        {{ landing['name'] }}
+    </h3>
+
+    <ul class="list-group">
+        <li class="list-group-item">
+            {{ item_country2(landing['cc']) }}
+        </li>
+
+        {% call list_item_collapse('id_col_cables', 'Cables', landing['cables']|length, expanded=1) %}
+            {% for cid in landing['cables'] %}
+                {%- filter spaceless -%}
+                    {{ item_cable(db['cables'][cid]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+    </ul>
+
+</div>
+{% endfilter %}
+{% endblock %}

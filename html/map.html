@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- side bar for info -->
+        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-3 col-xl-2">
+            {% block sidebar %}
+            {% endblock %}
+
+            <div id='id_info'>
+            </div>
+        </div>
+
+        <!-- main map view -->
+        <div class="h-100 col-xs-12 col-sm-12 col-md-8 col-lg-9 col-xl-10" style="padding: 0px;">
+            <div id="id_map" style="background-color: {{ colors['bg_map'] }};">
+            </div>
+
+            <script>
+            {% block map %}
+                var cn_border       = '{{ colors['cn_border']     }}';
+                var cn_empty        = '{{ colors['cn_empty']      }}';
+                var cn_base         = '{{ colors['cn_base']       }}';
+                var cn_high         = '{{ colors['cn_high']       }}';
+                var cn_selected     = '{{ colors['cn_selected']   }}';
+                var fac_base        = '{{ colors['fac_base']      }}';
+                var fac_bad         = '{{ colors['fac_bad']       }}';
+                var lnd_base        = '{{ colors['lnd_base']      }}';
+                var link_selected   = '{{ colors['link_selected'] }}';
+
+                var datamap_fills   = {
+                    defaultFill:    cn_empty,
+                    high:           cn_selected,
+                    cn_empty:       cn_empty,
+                    cn_base:        cn_base,
+                    cn_high:        cn_high,
+                    // col_arc:        col_arc,
+                    facility:       fac_base,
+                    facbad:         fac_bad,
+                    landing:        lnd_base,
+                };
+                var datamap_data    = {};
+
+                // get info from page
+                var map_data        = {{ page.data|tojson|safe }};
+                var map_data_max    = {{ page.col_max }};
+                var map_bubbles     = {{ page.bubbles|tojson|safe }};
+                var map_arcs        = {{ page.arcs|tojson|safe }};
+
+                function spawn_map()
+                {
+                    var just_moved = 0;
+
+                    // make sure the subpage declared the data to be rendered
+                    if(!map_data || !map_data_max)
+                        return alert("error, no map_data or map_data_max !");
+
+                    // linear color interp
+                    function cn_color(val, max)
+                    {
+                        if(val == 0)
+                            return cn_empty;
+                        var color = d3.scale.linear().domain([1, max])
+                            .interpolate(d3.interpolateHcl)
+                            .range([d3.rgb(cn_base), d3.rgb(cn_high)]);
+                        return color(val);
+                    }
+
+                    // hover callbacks
+                    function _on_hover_geo(geo, data)
+                    {
+                        var n = (data && data.data) ? data.data.name : geo.properties.name;
+                        var s = (data && data.data) ? data.data.hover : '';
+                        return  '<div class="hoverinfo" style="text-align: center"><strong>' + n + '</strong><br/>' + s + '</div>'
+                    }
+
+                    function _on_hover_bub(data)
+                    {
+                        var n = data.name;
+                        var s = data.hover;
+                        return  '<div class="hoverinfo" style="text-align: center"><strong>' + n + '</strong><br/>' + s + '</div>'
+                    }
+
+                    function _on_hover_arc(data, onoff)
+                    {
+                        if(onoff)
+                        {
+                            // switch arc color
+                            $(event.target).css('stroke', link_selected);
+
+                            // show popup
+                            $('#id_map .datamaps-hoverover')
+                                .html('<div class="hoverinfo" style="text-align: center"><strong>' + data.name + '</strong><br/>' + data.hover + '</div>')
+                                .css('top',  (event.offsetY + 30) + "px")
+                                .css('left', event.offsetX + "px")
+                                .show();
+                        }
+                        else
+                        {
+                            // return arc color to normal & hide popup
+                            $(event.target).css('stroke', data.strokeColor);
+                            $('#id_map .datamaps-hoverover').hide();
+                        }
+
+                        $('#side_info').text('hover arc ' + data);
+                    }
+
+                    // click callbacks
+                    function _on_click_null()
+                    {
+                        if(just_moved)
+                            return;
+                        if(typeof window.on_click_null !== 'undefined')
+                            return on_click_null();
+                        $('#side_info').text('click null');
+                    }
+
+                    function _on_click_geo(geo, data)
+                    {
+                        if(just_moved)
+                            return;
+                        if(typeof window.on_click_geo !== 'undefined')
+                            return on_click_geo(geo, data);
+
+                        window.location.href = '/redir/' + geo.id;
+                    }
+
+                    function _on_click_bub(data)
+                    {
+                        if(just_moved)
+                            return;
+                        // if(typeof window.on_click_bub !== 'undefined') return on_click_bub(data);
+                        // $('#side_info').text('click bub ');
+                        if(data.url)
+                            window.location.href = data.url;
+                    }
+
+                    function _on_click_arc(data)
+                    {
+                        if(just_moved)
+                            return;
+                        if(typeof window.on_click_arc !== 'undefined') return on_click_arc(data);
+                        $('#side_info').text('click arc ');
+                    }
+
+
+                    // called after map creation
+                    function _on_created(map)
+                    {
+                        // activate pan & zoom
+                        map.svg.call(d3.behavior.zoom().on("zoom", function ()
+                        {
+                            // handle world map resizing
+                            map.svg.selectAll("g").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+
+                            // prevent unwanted clicks when moving map around
+                            just_moved = 1;
+                            setTimeout(function() {just_moved=0;}, 500);
+
+                            // handle bubbles rescaling
+                            map.svg.selectAll('.datamaps-bubble')
+                                .attr('r', function(d) { return (d.radius / d3.event.scale) + 'px'; });
+
+                            // arcs rescaling
+                            map.svg.selectAll('.datamaps-arc')
+                                .style('stroke-width', function (d) {
+                                    return (d.orig_width / d3.event.scale) + 'px';
+                                });
+
+                            event.stopPropagation();
+                        }));
+
+                        // enrich map with arcs & bubbles
+                        if(typeof map_arcs !== 'undefined')    map.arc(map_arcs);
+                        if(typeof map_bubbles !== 'undefined') map.bubbles(map_bubbles);
+
+                        // on-click handle for bubles
+                        map.svg.selectAll('.datamaps-bubble').on('click', function(bub) {
+                            _on_click_bub(bub);
+                            event.stopPropagation();
+                        });
+
+                        // on-click handle for arcs
+                        map.svg.selectAll('.datamaps-arc').on('click', function(arc) {
+                            _on_click_arc(arc);
+                            event.stopPropagation();
+                        });
+
+                        // on-click handle for countries
+                        map.svg.selectAll('.datamaps-subunit').on('click', function(geo) {
+                            _on_click_geo(geo, map.options.data[geo.id]);
+                            event.stopPropagation();
+                        });
+
+                        // on-hover handle for arcs
+                        map.svg.selectAll('.datamaps-arc').on('mouseover', function(arc) {
+                            _on_hover_arc(arc, 1);
+                            event.stopPropagation();
+                        });
+                        map.svg.selectAll('.datamaps-arc').on('mouseout', function(arc) {
+                            _on_hover_arc(arc, 0);
+                            event.stopPropagation();
+                        });
+                    }
+
+                    $('#id_map').on('click', _on_click_null);
+
+                    // create fillkeys & data for datamap
+                    for(var i in map_data)
+                    {
+                        datamap_fills[map_data[i].iso3] = cn_color(map_data[i].col, map_data_max);
+                        datamap_data[map_data[i].iso3] =
+                        {
+                            fillKey:    map_data[i].iso3,
+                            data:       map_data[i],
+                        };
+                    }
+
+                    var datamap_opts =
+                    {
+                        scope:          'world',
+                        projection:     'mercator',
+                        responsive:     0,
+                        element:        document.getElementById('id_map'),
+                        height:         window.innerHeight - $('#id_nav').outerHeight() - 12,
+                        geographyConfig:
+                        {
+                            hideAntarctica:         true,
+                            borderWidth:            0.5,
+                            borderOpacity:          1,
+                            borderColor:            cn_border,
+                            popupTemplate:          _on_hover_geo,
+                            popupOnHover:           true,
+                            highlightOnHover:       true,
+                            highlightFillColor:     cn_selected,
+                            highlightBorderColor:   'rgba(255, 255, 255, 0.2)',
+                            highlightBorderWidth:   1,
+                        },
+                        bubblesConfig: {
+                            borderWidth:            1,
+                            borderOpacity:          1,
+                            borderColor:            '#FFFFFF',
+                            popupOnHover:           true,
+                            radius:                 null,
+                            popupTemplate:          _on_hover_bub,
+                            fillOpacity:            0.40,
+                            animate:                true,
+                            highlightOnHover:       true,
+                            highlightFillColor:     '#838181',
+                            highlightFillOpacity:   0.75,
+                            highlightBorderColor:   '#000000',
+                            highlightBorderWidth:   1,
+                            highlightBorderOpacity: 0.75,
+                            exitDelay:              100,
+                        },
+                        arcConfig: {
+                            strokeColor:            '#C3C3C3',
+                            strokeWidth:            1,
+                            arcSharpness:           1,
+                            animationSpeed:         600,
+                        },
+                        fills:          datamap_fills,
+                        data:           datamap_data,
+                        done:           _on_created,
+                    };
+
+                    // finally create map & display it
+                    var map = new Datamap(datamap_opts);
+                    return map;
+                }
+
+                map = spawn_map();
+
+            {% endblock %}
+            </script>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

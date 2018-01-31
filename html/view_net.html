@@ -1,0 +1,163 @@
+{% extends "map.html" %}
+
+{% from "tools.html" import flag_24             with context %}
+{% from "tools.html" import flag_32             with context %}
+{% from "tools.html" import list_item_collapse  with context %}
+{% from "tools.html" import item_net            with context %}
+{% from "tools.html" import item_facility       with context %}
+{% from "tools.html" import item_link           with context %}
+
+<!-- display info for a network -->
+{% block sidebar %}
+{% filter stripblock %}
+    <div class="">
+        <h3>
+            <i class="flaticon-network2"></i>
+            {{ flag_32(net['cc']) }} AS{{ net['asn'] }}
+        </h3>
+        <h4>
+            {% if net['website']|length > 0 %}
+                <img src="http://www.google.com/s2/favicons?domain_url={{ net['website'] }}" style="height: 24px;">
+            {% endif %}
+            {{ net['name'] }}
+        </h4>
+
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Registrar
+                <span class="badge badge-primary badge-pill"> {{ net['registry'] }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Type
+                <span class="badge badge-primary badge-pill"> {{ net['type'] }}</span>
+            </li>
+            {% if net['website']|length > 0 %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                URL: <a href="{{ net['website'] }}">{{ net['website'] }}</a>
+            </li>
+            {% endif %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Total IX Bandwith
+                <span class="badge badge-primary badge-pill"> {{ net['speed_ix']|bandwith }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Declared Bandwith
+                {% if net['speed_tot'] and net['speed_tot'] > 0 %}
+                    <span class="badge badge-primary badge-pill"> {{ net['speed_tot'] }}</span>
+                {% else %}
+                    <span class="badge badge-primary badge-pill"> N/A</span>
+                {% endif %}
+            </li>
+
+            {% call list_item_collapse('id_collapse_facs', 'Facilities', net['fac_ids']|length) %}
+                {% for i in net['fac_ids'] %}
+                    {%- filter spaceless -%}
+                        {{ item_facility(db['facilities'][i|string]) }}
+                    {% endfilter %}
+                {% endfor %}
+            {% endcall %}
+
+            {% call list_item_collapse('id_collapse_ixs', 'IXs', net['ix_ids']|length) %}
+                {% for i in net['ix_ids']|sort %}
+                    {%- filter spaceless -%}
+                        <div class="ovf">
+                            <a href="/ix/{{ db['ixs'][i|string]['id'] }}">
+                                <span class="badge badge-secondary badge-pill" style="width: 60px;">
+                                    {{ net['ix_speed'][i|string]|bandwith2 }}
+                                </span>
+                                {{ flag_24(db['ixs'][i|string]['country']) }} {{ db['ixs'][i|string]['name'] }}
+                            </a>
+                        </div>
+                    {% endfilter %}
+                {% endfor %}
+            {% endcall %}
+
+            {% call list_item_collapse('id_collapse_as', 'AS Links', net['links_as']|length) %}
+                {% for asn in net['links_as']|sort if asn|string in db['nets'] %}
+                    {%- filter spaceless -%}
+                        {{ item_net(db['nets'][asn|string]) }}
+                    {% endfilter %}
+                {% endfor %}
+            {% endcall %}
+
+            {% call list_item_collapse('id_collapse_pfx4', 'IPv4 prefixes', net['prefix4']) %}
+                {% for pfx in net['prefix'] if not ':' in pfx %}
+                    {%- filter spaceless -%}
+                        <span>{{ pfx }}</span><br/>
+                    {% endfilter %}
+                {% endfor %}
+            {% endcall %}
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                IPv4 Addresses
+                <span class="badge badge-primary badge-pill"> {{ net['addr4']|bignumb }}</span>
+            </li>
+
+            {% call list_item_collapse('id_collapse_pfx6', 'IPv6 prefixes', net['prefix6']) %}
+                {% for pfx in net['prefix'] if ':' in pfx %}
+                    {%- filter spaceless -%}
+                        <span>{{ pfx }}</span><br/>
+                    {% endfilter %}
+                {% endfor %}
+            {% endcall %}
+
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                IPv6 Addresses
+                <span class="badge badge-primary badge-pill"> {{ net['addr6']|bignumb }}</span>
+            </li>
+
+            {% call list_item_collapse('id_collapse_cc', 'World Direct Links', net['links_dir']|length) %}
+                <ul class="list-group">
+                {% for cc in net['links_dir']|sort %}
+                    {% call list_item_collapse('id_collapse_cc' + loop.index|string, flag_24(cc) + cc, net['links_dir'][cc]['fac']|length + net['links_dir'][cc]['net']|length + net['links_dir'][cc]['ix']|length, 1) %}
+                        {% for key in net['links_dir'][cc] %}
+                            {% for val in net['links_dir'][cc][key] %}
+                                {%- filter spaceless -%}
+                                    {{ item_link(cc, key, val) }}
+                                {% endfilter %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endcall %}
+                {% endfor %}
+                </ul>
+            {% endcall %}
+
+            {% call list_item_collapse('id_collapse_ccind', 'World Indirect Links', net['links_ind']|length) %}
+                <ul class="list-group">
+                {% for cc in net['links_ind']|sort %}
+                    {% call list_item_collapse('id_collapse_ccind_' + loop.index|string, flag_24(cc) + cc, net['links_ind'][cc]['fac']|length + net['links_ind'][cc]['net']|length + net['links_ind'][cc]['ix']|length, 1) %}
+                        {% for key in net['links_ind'][cc] %}
+                            {% for val in net['links_ind'][cc][key] %}
+                                {%- filter spaceless -%}
+                                    {{ item_link(cc, key, val) }}
+                                {% endfilter %}
+                            {% endfor %}
+                        {% endfor %}
+                    {% endcall %}
+                {% endfor %}
+                </ul>
+            {% endcall %}
+
+            <li class="list-group-item">
+                <label class="custom-control custom-checkbox mb-0">
+                    <input type="checkbox" class="custom-control-input" checked onchange="$('#id_map .bubbles [data-info*=facility]').toggle();">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">Show Facilities</span>
+                </label>
+                <label class="custom-control custom-checkbox mb-0">
+                    <input type="checkbox" class="custom-control-input" checked onchange="$('#id_map .arc [data-info*=dirlink]').toggle();">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">Show Direct Links</span>
+                </label>
+                <label class="custom-control custom-checkbox mb-0">
+                    <input type="checkbox" class="custom-control-input" checked onchange="$('#id_map .arc [data-info*=indlink]').toggle();">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">Show Indirect Links</span>
+                </label>
+            </li>
+
+        </ul>
+    </div>
+{% endfilter %}
+{% endblock %}
+

@@ -1,0 +1,137 @@
+
+<!-- display country flag with 24px height -->
+{% macro flag_24(cc) %}
+    {% if cc != '??' %}
+        <img src="/res/blank.gif" class="flag-24 flag-24-{{ cc|lower }}" title="{{ cc|upper }}" />
+    {% else %}
+        <img src="/res/blank.gif" class="" style="width: 24px" />
+    {% endif %}
+{% endmacro %}
+
+<!-- display country flag with 32px height -->
+{% macro flag_32(cc) %}
+    {% if cc != '??' and cc != 'RE' and cc != 'XK' and cc != 'SX' and cc != 'GF' and cc != 'GP' and cc != 'PM' and cc != 'IO' %}
+        <img src="/res/blank.gif" class="flag-32 flag-32-{{ cc|lower }}" title="{{ cc|upper }}" />
+    {% else %}
+        <img src="/res/blank.gif" class="" style="width: 32px" />
+    {% endif %}
+{% endmacro %}
+
+<!-- list item with collapsible content -->
+{% macro list_item_collapse(id, name, count, notheme=0, expanded=0) %}
+    <li class="{% if not notheme %}list-group-item{% else %}linone{% endif %}">
+        <div data-toggle="collapse" id="{{ id }}_ctrl" href="#{{ id }}" aria-expanded="{% if expanded %}true{% else %}false{% endif %}" aria-controls="{{ id }}" onclick="$('#{{ id }}_ctrl i').toggle();">
+            <i class="flaticon-caret-right" ></i>
+            <i class="flaticon-caret-down"  style="display: none;"></i>
+            {{ name|safe }}
+            <span class="badge badge-{% if not notheme %}primary{% else %}secondary{% endif %} badge-pill float-right"> {{ count }}</span>
+        </div>
+
+        <div class="{% if not expanded %}collapse{% endif %}" id="{{ id }}">
+            <div class="">
+                {{ caller() }}
+            </div>
+        </div>
+    </li>
+{% endmacro %}
+
+<!-- item AS -->
+{% macro item_net(net, speed=0) %}
+    <div class="ovf">
+        <a href="/net/{{ net['asn'] }}">
+            {{ flag_24(net['cc']) }} {{ net['asn'] }} {{ net['name'] }}
+        </a>
+    </div>
+{% endmacro %}
+
+<!-- item facility -->
+{% macro item_facility(fac) %}
+    <div class="ovf">
+        <a href="/fac/{{ fac['id'] }}">
+            <i class="flaticon-city" style="color: black;"></i>
+            {{ flag_24(fac['country']) }} {{ fac['name'] }}
+        </a>
+    </div>
+{% endmacro %}
+
+<!-- item ix -->
+{% macro item_ix(ixi) %}
+    <div class="ovf">
+        <a href="/ix/{{ ixi['id'] }}">
+            <i class="flaticon-interconnect" style="color: black;"></i>
+            {{ flag_24(ixi['country']) }} {{ ixi['name'] }}
+        </a>
+    </div>
+{% endmacro %}
+
+<!-- item country -->
+{% macro item_country(cc) %}
+    <a href="/country/{{ cc }}">
+        {{ flag_24(cc) }} {{ cc }}
+    </a>
+{% endmacro %}
+
+{% macro item_country2(cc) %}
+    <a href="/country/{{ cc }}">
+        {{ flag_24(cc) }} {{ db['countries'][cc]['name'] }}
+    </a>
+{% endmacro %}
+
+<!-- item landing -->
+{% macro item_landing(ld) %}
+    <div class="ovf">
+        <a href="/landing/{{ ld['id'] }}">
+            <i class="flaticon-anchor" style="color: black;"></i>
+            {{ flag_24(ld['cc']) }}
+            {{ '(%d) %s' % (ld['cables']|length, ld['name']) }}
+        </a>
+    </div>
+{% endmacro %}
+
+<!-- item cable -->
+{% macro item_cable(c) %}
+    <div class="">
+        <a href="/cable/{{ c['id'] }}">
+            <i class="flaticon-pipe1" style="color: black;"></i>
+            {{ '(%d) %s' % (c['landings']|length, c['name']) }}
+        </a>
+    </div>
+{% endmacro %}
+
+
+<!-- item net/facility/ix/cable/landing -->
+{% macro item_link(cc, type, id) %}
+    {% if type == 'net' %}
+        {{ item_net(db['nets'][id|string]) }}
+    {% elif type == 'fac' %}
+        {{ item_facility(db['facilities'][id|string]) }}
+    {% elif type == 'ix' %}
+        {{ item_ix(db['ixs'][id|string]) }}
+    {% elif type == 'cable' %}
+        {{ item_cable(db['cables'][id|string]) }}
+    {% elif type == 'landing' %}
+        {{ item_landing(db['landings'][id|string]) }}
+    {% endif %}
+{% endmacro %}
+
+
+{% macro credits() %}
+<div>
+    Data sources:
+    <ul>
+        <li>
+            <a target="_blank" href="https://www.ripe.net/">            Ripe</a>,
+            <a target="_blank" href="https://www.arin.net/">            Arin</a>,
+            <a target="_blank" href="https://www.apnic.net/">           Apnic</a>,
+            <a target="_blank" href="http://www.lacnic.net/">           Lacnic</a>,
+            <a target="_blank" href="http://www.afrinic.net/">          Afrinic</a>
+            <br/>
+        </li>
+        <li><a target="_blank" href="https://www.peeringdb.com/">       PeeringDB       </a><br/></li>
+        <li><a target="_blank" href="https://www.telegeography.com/">   TeleGeography   </a><br/></li>
+        <li><a target="_blank" href="http://routeviews.org/">           routeviews.org  </a><br/></li>
+        <li><a target="_blank" href="http://geonames.org/">             geonames.org    </a><br/></li>
+        <li><a target="_blank" href="http://maxmind.org/">              maxmind.org     </a><br/></li>
+    </ul>
+</div>
+{% endmacro %}

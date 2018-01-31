@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% from "tools.html" import credits with context %}
+
+{% macro data_explore(id, type, text) %}
+    <div id="{{ id }}">
+        <div class="p-2 d-inline-block w-100 alert alert-secondary" style="">
+            <div class="d-inline">
+                <label style="width: 140px;">
+                    {{ text }}
+                </label>
+
+                <select id="{{ id }}_key" class="custom-select mx-2" onchange="dostuff('{{ type }}', '{{ id }}');">
+                    <option value="" selected>* Select *</option>
+                    {{ caller() }}
+                </select>
+            </div>
+
+            <div class="d-inline float-right">
+                Limit to
+                <select id="{{ id }}_limit" class="custom-select mx-2" onchange="dostuff('{{ type }}', '{{ id }}');">
+                    <option value="5"   >5</option>
+                    <option value="10" selected>10</option>
+                    <option value="25"  >25</option>
+                    <option value="50"  >50</option>
+                    <option value="100" >100</option>
+                    <option value="all" >All</option>
+                </select>
+
+                <button class="btn btn-outline-primary" onclick="$('#{{ id }} .toggle').toggle();">
+                    <span class="toggle">Show</span>
+                    <span class="toggle" style="display: none;">Hide</span>
+                </button>
+            </div>
+        </div>
+        <br/>
+        <div id="{{ id }}_res" class="pb-4 results toggle" style="display: none;">
+            <div class="p-2">
+                <div id="{{ id }}_res_cnt">
+                </div>
+            </div>
+        </div>
+    </div>
+{% endmacro %}
+
+{% block content %}
+
+<script>
+    var disp_items = {
+        'countries': {
+            'cc':               { flag: 1, bignumb: 0, bandwith: 0, disp: 'CC'                      },
+            'name':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'Name'                    },
+            'pop':              { flag: 0, bignumb: 1, bandwith: 0, disp: 'Population'              },
+            'lnd':              { flag: 0, bignumb: 1, bandwith: 0, disp: 'Area'                    },
+            'fac_ids':          { flag: 0, bignumb: 1, bandwith: 0, disp: 'Facilities'              },
+            'ix_ids':           { flag: 0, bignumb: 1, bandwith: 0, disp: 'Exchanges'               },
+            'cables':           { flag: 0, bignumb: 1, bandwith: 0, disp: 'Cables'                  },
+            'landings':         { flag: 0, bignumb: 1, bandwith: 0, disp: 'Landings'                },
+            'links_dir_out':    { flag: 0, bignumb: 1, bandwith: 0, disp: 'Outgoing links'          },
+            'links_dir_inc':    { flag: 0, bignumb: 1, bandwith: 0, disp: 'Incoming links'          },
+            'links_ind_out':    { flag: 0, bignumb: 1, bandwith: 0, disp: 'Outgoing indirect links' },
+            'links_ind_inc':    { flag: 0, bignumb: 1, bandwith: 0, disp: 'Incoming indirect links' },
+            'nets_ext':         { flag: 0, bignumb: 1, bandwith: 0, disp: 'External Networks'       },
+            'nets_loc':         { flag: 0, bignumb: 1, bandwith: 0, disp: 'Local Networks'          },
+            'addr4':            { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv4 addresses'          },
+            'addr6':            { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv6 addresses'          },
+            'prefix4':          { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv4 prefixes'           },
+            'prefix6':          { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv6 prefixes'           },
+        },
+
+        'nets': {
+            'asn':              { flag: 0, bignumb: 0, bandwith: 0, disp: 'ASN'                     },
+            'name':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'Name'                    },
+            'cc':               { flag: 1, bignumb: 0, bandwith: 0, disp: 'CC'                      },
+            'speed_ix':         { flag: 0, bignumb: 0, bandwith: 1, disp: 'Calculated IX bandwith'  },
+            'speed_tot':        { flag: 0, bignumb: 1, bandwith: 0, disp: 'Announced total bandwith'},
+            'fac_ids':          { flag: 0, bignumb: 1, bandwith: 0, disp: 'Facilities'              },
+            'ix_ids':           { flag: 0, bignumb: 1, bandwith: 0, disp: 'Exchanges'               },
+            'links_as':         { flag: 0, bignumb: 1, bandwith: 0, disp: 'Link to Networks'        },
+            'links_dir':        { flag: 0, bignumb: 1, bandwith: 0, disp: 'direct country links'    },
+            'links_ind':        { flag: 0, bignumb: 1, bandwith: 0, disp: 'indirect country links'  },
+            'addr4':            { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv4 Addresses'          },
+            'addr6':            { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv6 Addresses'          },
+            'prefix4':          { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv4 prefixes'           },
+            'prefix6':          { flag: 0, bignumb: 1, bandwith: 0, disp: 'IPv6 prefixes'           },
+        },
+
+        'ixs': {
+            'name':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'Name'                    },
+            'country':          { flag: 1, bignumb: 0, bandwith: 0, disp: 'CC'                      },
+            'city':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'City'                    },
+            'bandwith':         { flag: 0, bignumb: 0, bandwith: 1, disp: 'Total Bandwith'          },
+            'facilities':       { flag: 0, bignumb: 1, bandwith: 0, disp: 'Facilities'              },
+            'nets':             { flag: 0, bignumb: 1, bandwith: 0, disp: 'Networks'                },
+        },
+
+        'facilities': {
+            'name':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'Name'                    },
+            'country':          { flag: 1, bignumb: 0, bandwith: 0, disp: 'CC'                      },
+            'city':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'City'                    },
+            'ix':               { flag: 0, bignumb: 1, bandwith: 0, disp: 'Exchanges'               },
+            'nets':             { flag: 0, bignumb: 1, bandwith: 0, disp: 'Networks'                },
+        },
+
+        'cables': {
+            'name':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'Name'                    },
+            'countries':        { flag: 0, bignumb: 0, bandwith: 0, disp: 'Countries'               },
+            'landings':         { flag: 0, bignumb: 0, bandwith: 0, disp: 'Landings'                },
+            'length':           { flag: 0, bignumb: -1,bandwith: 0, disp: 'Length'                  },
+            'owners':           { flag: 0, bignumb: 0, bandwith: 0, disp: 'Owners'                  },
+        },
+
+        'landings': {
+            'name':             { flag: 0, bignumb: 0, bandwith: 0, disp: 'Name'                    },
+            'cc':               { flag: 1, bignumb: 0, bandwith: 0, disp: 'CC'                      },
+            'cables':           { flag: 0, bignumb: 0, bandwith: 0, disp: 'Cables'                  },
+        },
+    };
+
+    function bignumb(val)
+    {
+        if(val >= 1000*1000*1000*1000)
+            return sprintf('%.1e', val);
+        else if(val >= 1000*1000*1000)
+            return sprintf('%.1f B', (val / (1000*1000*1000)));
+        else if(val >= 1000*1000)
+            return sprintf('%.1f M', (val / (1000*1000)));
+        else if(val >= 1000)
+            return sprintf('%.1f k', (val / 1000));
+        else if(val != 0)
+            return val;
+        else
+            return '0';
+    }
+
+    function bandwith(val)
+    {
+        if(val >= 1000 * 1000)
+            return sprintf('%.1f Tbps', val / 1000000.0);
+        else if(val >= 1000)
+            return sprintf('%.1f Gbps', val / 1000.0);
+        return sprintf('%d Mbps', val);
+    }
+
+
+    function dostuff(type, id)
+    {
+        var key = $('#' + id + '_key').val();
+        var lmt = $('#' + id + '_limit').val();
+
+        $('#id_explore .results').hide();
+        $.get('/top/' + type + '/' + key + '/' + lmt, function (data, status, xhr)
+        {
+            $('#' + id + '_res').show();
+            if(status != 'success')
+                return $('#' + id + '_res_cnt').html('error');
+
+            var html = '<table class="table table-sm table-striped table-hover"><tr>';
+            for(var i in disp_items[type])
+                html += '<th>' + disp_items[type][i].disp + '</th>';
+            html += '</tr>\n';
+
+            for(var i in data)
+            {
+                var href = '#';
+                if(type == 'countries')
+                    href = '/country/' + data[i].cc;
+                else if (type == 'nets')
+                    href = '/net/' + data[i].asn;
+                else if (type == 'ixs')
+                    href = '/ix/' + data[i].id;
+                else if (type == 'facilities')
+                    href = '/fac/' + data[i].id;
+                else if (type == 'cables')
+                    href = '/cable/' + data[i].id;
+                else if (type == 'landings')
+                    href = '/landing/' + data[i].id;
+
+                html += '<tr onclick="window.location.href = \'' + href + '\' " style="cursor: pointer;">';
+                for(var j in disp_items[type])
+                {
+                    var key = j;
+                    var val = data[i][key];
+
+                    if(typeof val === 'object')
+                        val = Object.keys(val).length;
+
+                    if(disp_items[type][j].bignumb == -1 && val == -1)
+                        val = '?';
+                    else if(disp_items[type][j].bignumb)
+                        val = bignumb(val);
+                    if(disp_items[type][j].bandwith)
+                        val = bandwith(val);
+                    if(disp_items[type][j].flag)
+                        html += '<td><img src="/res/blank.gif" class="flag-24 flag-24-' + val.toLowerCase() + '" />' + val + '</td>';
+                    else
+                        html += '<td>' + val + '</td>';
+                }
+                html += '</tr>';
+            }
+
+            html += '</table>';
+            $('#' + id + '_res_cnt').html(html);
+        });
+    }
+
+
+</script>
+
+<div id="id_explore" class="container-fluid">
+    <h3 class="display-5">
+        <img src="/res/favicon.png">
+        CyberSpace: World Internet Map
+    </h3>
+    <div>
+        2017 - Martin Balch -
+        <a href="mailto:martin.balch+wnm@gmail.com">
+            contact
+        </a>
+        <br/>
+        Code, database &amp; methodology available on <a target="_blank" href="https://github.com/ixty/wnm">github</a>.
+    </div>
+    {{ credits() }}
+
+    <div class="row">
+
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">
+            <br/>
+
+            {% call data_explore('id_data_cn', 'countries', 'Top Countries by') %}
+                <option value="pop"             >Population                 </option>
+                <option value="lnd"             >Area (Km^2)                </option>
+                <option value="fac_ids"         ># Facilities               </option>
+                <option value="ix_ids"          ># Exchanges (IX)           </option>
+                <option value="landings"        ># Landings                 </option>
+                <option value="cables"          ># Cables                   </option>
+                <option value="links_dir_out"   ># direct outgoing links    </option>
+                <option value="links_dir_inc"   ># direct incoming links    </option>
+                <option value="links_ind_out"   ># indirect outgoing links  </option>
+                <option value="links_ind_inc"   ># indirect incoming links  </option>
+                <option value="nets_ext"        ># External Networks        </option>
+                <option value="nets_loc"        ># Local Networks           </option>
+                <option value="addr4"           ># IPv4 Addresses           </option>
+                <option value="addr6"           ># IPv6 Addresses           </option>
+                <option value="prefix4"         ># IPv4 prefixes            </option>
+                <option value="prefix6"         ># IPv6 prefixes            </option>
+            {% endcall %}
+
+            {% call data_explore('id_data_net', 'nets', 'Top Networks by') %}
+                <option value="speed_ix"        >Calculated IX bandwith     </option>
+                <option value="fac_ids"         ># Facilities               </option>
+                <option value="ix_ids"          ># Exchanges (IX)           </option>
+                <option value="links_as"        ># Link to Networks         </option>
+                <option value="links_dir"       ># direct country links     </option>
+                <option value="links_ind"       ># indirect country links   </option>
+                <option value="addr4"           ># IPv4 Addresses           </option>
+                <option value="addr6"           ># IPv6 Addresses           </option>
+                <option value="prefix4"         ># IPv4 prefixes            </option>
+                <option value="prefix6"         ># IPv6 prefixes            </option>
+            {% endcall %}
+
+            {% call data_explore('id_data_ix', 'ixs', 'Top Exchanges by') %}
+                <option value="bandwith"        >Total Bandwith             </option>
+                <option value="facilities"      ># Facilities               </option>
+                <option value="nets"            ># Networks                 </option>
+            {% endcall %}
+
+            {% call data_explore('id_data_fac', 'facilities', 'Top Facilities by') %}
+                <option value="ix"              ># Exchanges                </option>
+                <option value="nets"            ># Networks                 </option>
+            {% endcall %}
+
+            {% call data_explore('id_data_cables', 'cables', 'Top Cables by') %}
+                <option value="length"          > Length                    </option>
+                <option value="countries"       ># Countries                </option>
+                <option value="landings"        ># Landings                 </option>
+                <option value="owners"          ># Owners                   </option>
+            {% endcall %}
+
+            {% call data_explore('id_data_landings', 'landings', 'Top Landings by') %}
+                <option value="cables"          ># Cables                   </option>
+            {% endcall %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}

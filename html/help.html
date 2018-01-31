@@ -1,0 +1,129 @@
+{% macro help() %}
+
+<div class="container-fluid mt-4">
+    <div class="card mx-2">
+        <div class="card-header d-flex justify-content-between">
+            <h3>
+                Legend
+            </h3>
+            <button class="btn btn-outline-secondary" onclick="$('#id_overlay').hide();">
+                <b>&nbsp;&times;&nbsp;</b>
+            </button>
+        </div>
+        <div class="card-body">
+            <p class="card-text">
+
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="flaticon-earth"></i>
+                                    <b>World</b>
+                                </h6>
+                                <p class="card-text">
+                                    This icon is used to represent country rankings based on a network connectivity indicator such as the number of networks, number of IP addresses, etc.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="flaticon-flag1"></i>
+                                    <b>Countries</b>
+                                </h6>
+                                <p class="card-text">
+                                    Countries are colored differently based on the current view.<br/>
+                                    <i>In world rankings, countries are colored based on the selected variable.</i><br/>
+                                    <i>In country view, other countries are colored if they are directly or indirectly linked to the focused country.</i><br/>
+                                    <i>In network view, countries are colored if the current network has direct or indirect links to this country.</i><br/>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="flaticon-network2"></i>
+                                    <b>Network</b>
+                                </h6>
+                                <p class="card-text">
+                                    Networks or Autonomous Systems (AS) are collections of Internet Protocol (IP) routed prefixes under the control of a single administrative entity. To put it more plainly, an AS is network that is directly connected to the internet and that owns specific IP address ranges. Both Internet Service Providers (ex: AT&amp;T, Vodafone, Orange) and content providers (Google, Facebook, Amazon) own at least one AS.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="flaticon-interconnect"></i>
+                                    <b>Exchange</b>
+                                </h6>
+                                <p class="card-text">
+                                    An Internet exchange point (IX or IXP) is a physical infrastructure through which Internet service providers (ISPs) and content delivery networks (CDNs) exchange Internet traffic between their networks (autonomous systems).<br/>
+                                    <i>IX are displayed on the map only by the facilities at which they are present.</i>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="flaticon-city"></i>
+                                    <b>Facilities</b>
+                                </h6>
+                                <p class="card-text">
+                                    Facilities are physical points of peering, where networks interconnect either via internet exchanges or private peering agreements.<br/>
+                                    <i>They are represented on the map as red dots.</i>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="flaticon-pipe1"></i>
+                                    <b>Cables</b>
+                                </h6>
+                                <p class="card-text">
+                                    Submarine cables which are used to connect countries or different parts of a country together. Usually owned by internet service providers, they form the backbone of the internet.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-4 col-xl-3">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="flaticon-anchor"></i>
+                                    <b>Landings</b>
+                                </h6>
+                                <p class="card-text">
+                                    Landings are where submarine cables surface and give connectivity to a country.
+                                    <br/>
+                                    <i>They are represented on the map as orange dots.</i>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </p>
+
+        </div>
+    </div>
+</div>
+
+{% endmacro %}

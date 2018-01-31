@@ -1,0 +1,72 @@
+{% extends "map.html" %}
+
+{% from "tools.html" import flag_32             with context %}
+{% from "tools.html" import list_item_collapse  with context %}
+{% from "tools.html" import item_net            with context %}
+{% from "tools.html" import item_ix             with context %}
+{% from "tools.html" import item_country        with context %}
+
+<!-- display info for a facility -->
+{% block sidebar %}
+{% filter stripblock %}
+<div>
+    <h3>
+        <i class="flaticon-city"></i>
+        {{ flag_32(fac['country']) }}
+        {{ fac['name'] }}
+    </h3>
+
+    <ul class="list-group">
+        <li class="list-group-item">
+            {%- filter spaceless -%}
+                {{ fac['address1'] }}
+                {% if fac['address2']|length > 0 %}
+                    , {{ fac['address2'] }}
+                {% endif %}
+                {% if fac['city']|length > 0 %}
+                    , {{ fac['city'] }}
+                {% endif %}
+                {% if fac['state']|length > 0 %}
+                    , {{ fac['state'] }}
+                {% endif %}
+                , {{ fac['country'] }}
+            {% endfilter %}
+
+            {% if fac['website']|length %}
+                <br/><a href="{{ fac['website'] }}">{{ fac['website'] }}</a>
+            {% endif %}
+        </li>
+
+
+        {% call list_item_collapse('id_col_ixs', 'Exchanges', fac['ix']|length) %}
+            {% for xid in fac['ix'] %}
+                {%- filter spaceless -%}
+                    {{ item_ix(db['ixs'][xid|string]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        {% call list_item_collapse('id_col_nets', 'Networks', fac['nets']|length) %}
+            {% for asn in fac['nets'] %}
+                {%- filter spaceless -%}
+                    {{ item_net(db['nets'][asn|string]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        <li class="list-group-item">
+            <b>International Presence</b><br/>
+            <div class="d-flex flex-wrap justify-content-start">
+                {% for cc in fac['net_countries'] %}
+                    <span style="width:60px">
+                        {{ item_country(cc) }}
+                    </span>
+                {% endfor %}
+            </div>
+        </li>
+
+    </ul>
+</div>
+{% endfilter %}
+{% endblock %}
+

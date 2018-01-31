@@ -1,0 +1,102 @@
+{% extends "map.html" %}
+
+{% from "tools.html" import flag_24 with context %}
+{% from "tools.html" import credits with context %}
+
+{% block sidebar %}
+    <div id="id_world" class="h-100">
+        <div id="id_world_hdr">
+            <h3 id="id_title"> {{ page.title }} </h3>
+            <p  id="id_text" >
+                {{ page.text  }}
+
+                {% if page.pagename == 'ranks' and page.opt|length %}
+                    <b>
+                        {{ page.detail }}
+                    </b>
+                {% endif %}
+            </p>
+
+            {% if page.pagename == 'ranks' %}
+            <div>
+                <a class="btn btn-sm btn-{% if page.opt|length %}outline-{% endif %}primary mb-2" href="/ranks/{{page.key}}">
+                    Abs
+                </a>
+                {% if not page.opt|length %}
+                    <button class="btn btn-sm btn-outline-secondary mb-2 toggle" onclick="$('#id_world .toggle').toggle();">
+                        Show Values
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary mb-2 toggle" onclick="$('#id_world .toggle').toggle();" style="display: none;">
+                        Show %
+                    </button>
+                {% endif %}
+                <a class="btn btn-sm btn-{% if page.opt != 'pop' %}outline-{% endif %}primary mb-2" href="/ranks/{{page.key}}/pop">
+                    Pop
+                </a>
+                <a class="btn btn-sm btn-{% if page.opt != 'lnd' %}outline-{% endif %}primary mb-2" href="/ranks/{{page.key}}/lnd">
+                    Km^2
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+
+        {% if page.pagename == 'ranks' %}
+            <div id="id_world_ranks" class="ovfy">
+                {% for cn in page.data %}
+                    <a href="/country/{{ cn['cc'] }}">
+                        {{ flag_24(cn['cc']) }}
+                        {{ cn['name'] }}
+                    </a>
+
+                    {% if not page.opt|length %}
+                        <span class="badge badge-primary badge-pill float-right toggle">
+                            {{ '%.2f %%' % (100.0 * cn['val'] / page.total) }}
+                        </span>
+                        <span class="badge badge-primary badge-pill float-right toggle" style="display: none;">
+                            {{ cn['val']|bignumb }}
+                        </span>
+                    {% else %}
+                        <span class="badge badge-primary badge-pill float-right toggle">
+                            {{ cn['val']|bignumb }}
+                        </span>
+                    {% endif %}
+
+                    <br/>
+                {% endfor %}
+            </div>
+
+            <script>
+                $('#id_world_ranks').height(window.innerHeight - $('#id_world_ranks').offset().top - 8);
+            </script>
+        {% else %}
+            <div id="id_world_ranks">
+                <p>
+                    This is an experiment at mapping the world's internet connectivity.<br/>
+                </p>
+                <p>
+                    In this view, countries are colored according to their <b>number of networks</b>, red bubbles represent points where different <b>networks interconnect</b> and orange bubbles are where <b>submarine cables</b> land.
+                </p>
+                <p>
+                    Move around, zoom and click on the map or use the search bar to explore countries, networks, exchanges, etc.
+                </p>
+                <hr/>
+                <p>
+                    Code, database &amp; methodology available on <a target="_blank" href="https://github.com/ixty/wnm">github</a>.
+                    <br/>
+                </p>
+                <hr/>
+                {{ credits() }}
+            </div>
+
+            <div class="fixed-bottom px-2">
+                2017 - Martin Balch -
+                <a href="mailto:martin.balch+wnm@gmail.com">
+                    contact
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}
+

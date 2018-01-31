@@ -1,0 +1,66 @@
+{% extends "map.html" %}
+
+{% from "tools.html" import list_item_collapse  with context %}
+{% from "tools.html" import item_landing        with context %}
+
+
+<!-- display info for an exchange -->
+{% block sidebar %}
+{% filter stripblock %}
+<div>
+    <h3>
+        <i class="flaticon-pipe1"></i>
+        {{ cable['name'] }}
+    </h3>
+
+    <ul class="list-group">
+
+
+        {% if cable['url']|length > 0 %}
+            <li class="list-group-item">
+                <a href="{{ cable['url'] }}">{{ cable['url'] }}</a>
+            </li>
+        {% endif %}
+
+        {% if cable['owners']|length > 1 %}
+            {% call list_item_collapse('id_col_owners', 'Owners', cable['owners']|length) %}
+                {% for o in cable['owners'] %}
+                    {{ o }}<br/>
+                {% endfor %}
+            {% endcall %}
+        {% else %}
+            <li class="list-group-item">
+                {{ cable['owners'][0] }}
+            </li>
+        {% endif %}
+
+        {% if cable['notes']|length > 0 %}
+            <li class="list-group-item">
+                {{ cable['notes'] }}
+            </li>
+        {% endif %}
+
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Ready for service
+            <span class="badge badge-primary badge-pill"> {{ cable['rfs'] }}</span>
+        </li>
+
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Length
+            <span class="badge badge-primary badge-pill"> {{ cable['length']|distance }}</span>
+        </li>
+
+        {% call list_item_collapse('id_col_landings', 'Landings', cable['landings']|length, expanded=1) %}
+            {% for lid in cable['landings'] %}
+                {%- filter spaceless -%}
+                    {{ item_landing(db['landings'][lid]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+    </ul>
+
+
+</div>
+{% endfilter %}
+{% endblock %}

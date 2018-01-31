@@ -1,0 +1,204 @@
+{% extends "map.html" %}
+
+{% from "tools.html" import flag_24             with context %}
+{% from "tools.html" import flag_32             with context %}
+{% from "tools.html" import list_item_collapse  with context %}
+{% from "tools.html" import item_net            with context %}
+{% from "tools.html" import item_facility       with context %}
+{% from "tools.html" import item_ix             with context %}
+{% from "tools.html" import item_link           with context %}
+{% from "tools.html" import item_landing        with context %}
+{% from "tools.html" import item_cable          with context %}
+
+
+<!-- display info for a country -->
+{% block sidebar %}
+{% filter stripblock %}
+<div class="">
+    <h3>
+        <i class="flaticon-flag1"></i>
+        {{ flag_32(country['cc']) }}
+        {{ country['name'] }}
+    </h3>
+
+    <ul class="list-group">
+
+        <li class="list-group-item">
+            <div class=" d-flex justify-content-between align-items-center">
+                Capital:
+                <span class="badge badge-secondary badge-pill float-right"> {{ country['info']['Capital'] }}</span>
+            </div>
+            <div class=" d-flex justify-content-between align-items-center">
+                Population:
+                <span class="badge badge-secondary badge-pill float-right"> {{ country['pop']|bignumb }}</span>
+            </div>
+            <div class=" d-flex justify-content-between align-items-center">
+                Surface:
+                <span class="badge badge-secondary badge-pill float-right"> {{ country['lnd']|bignumb }} Km<sup>2</sup></span>
+            </div>
+            <div class=" d-flex justify-content-between align-items-center">
+                Tld:
+                <span class="badge badge-secondary badge-pill float-right"> {{ country['info']['tld'] }}</span>
+            </div>
+        </li>
+
+        {% call list_item_collapse('id_col_nets_loc', 'Networks Local', country['nets_loc']|length) %}
+            {%- for asn in country['nets_loc'] -%}
+                {%- filter spaceless -%}
+                    {{ item_net(db['nets'][asn|string]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        {% call list_item_collapse('id_col_nets_ext', 'Networks Incoming', country['nets_ext']|length) %}
+            {% for asn in country['nets_ext'] %}
+                {%- filter spaceless -%}
+                    {{ item_net(db['nets'][asn|string]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        {% call list_item_collapse('id_col_facs', 'Facilities', country['fac_ids']|length) %}
+            {% for fid in country['fac_ids'] %}
+                {%- filter spaceless -%}
+                    {{ item_facility(db['facilities'][fid|string]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        {% call list_item_collapse('id_col_ixs', 'Exchanges', country['ix_ids']|length) %}
+            {% for xid in country['ix_ids'] %}
+                {%- filter spaceless -%}
+                    {{ item_ix(db['ixs'][xid|string]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        {% call list_item_collapse('id_col_landings', 'Landings', country['landings']|length) %}
+            {% for lid in country['landings'] %}
+                {%- filter spaceless -%}
+                    {{ item_landing(db['landings'][lid]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        {% call list_item_collapse('id_col_cables', 'Cables', country['cables']|length) %}
+            {% for cid in country['cables'] %}
+                {%- filter spaceless -%}
+                    {{ item_cable(db['cables'][cid]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+                IPv4 addresses
+                <span class="badge badge-primary badge-pill"> {{ country['addr4']|bignumb }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                IPv4 prefixes
+                <span class="badge badge-primary badge-pill"> {{ country['prefix4'] }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                IPv6 addresses
+                <span class="badge badge-primary badge-pill"> {{ country['addr6']|bignumb }}</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+                IPv6 prefixes
+                <span class="badge badge-primary badge-pill"> {{ country['prefix6'] }}</span>
+            </div>
+        </li>
+
+        {% call list_item_collapse('id_collapse_cc', 'Direct Links Outgoing', country['links_dir_out']|length) %}
+            <ul class="list-group">
+            {% for cc in country['links_dir_out']|sort %}
+                {% call list_item_collapse('id_collapse_cc' + loop.index|string, flag_24(cc) + db['countries'][cc]['name'], country['links_dir_out'][cc]['fac']|length + country['links_dir_out'][cc]['net']|length + country['links_dir_out'][cc]['ix']|length + country['links_dir_out'][cc]['cable']|length, 1) %}
+                    {% for key in country['links_dir_out'][cc] %}
+                        {% for val in country['links_dir_out'][cc][key] %}
+                            {%- filter spaceless -%}
+                                {{ item_link(cc, key, val) }}
+                            {% endfilter %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endcall %}
+            {% endfor %}
+            </ul>
+        {% endcall %}
+
+        {% call list_item_collapse('id_collapse_inc', 'Direct Links Incoming', country['links_dir_inc']|length) %}
+            <ul class="list-group">
+            {% for cc in country['links_dir_inc']|sort %}
+                {% call list_item_collapse('id_collapse_inc_' + loop.index|string, flag_24(cc) + db['countries'][cc]['name'], country['links_dir_inc'][cc]['fac']|length + country['links_dir_inc'][cc]['net']|length + country['links_dir_inc'][cc]['ix']|length, 1) %}
+                    {% for key in country['links_dir_inc'][cc] %}
+                        {% for val in country['links_dir_inc'][cc][key] %}
+                            {%- filter spaceless -%}
+                                {{ item_link(cc, key, val) }}
+                            {% endfilter %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endcall %}
+            {% endfor %}
+            </ul>
+        {% endcall %}
+
+        {% call list_item_collapse('id_collapse_ccind', 'Indirect Links Outgoing', country['links_ind_out']|length) %}
+            <ul class="list-group">
+            {% for cc in country['links_ind_out']|sort %}
+                {% call list_item_collapse('id_collapse_ccind_' + loop.index|string, flag_24(cc) + db['countries'][cc]['name'], country['links_ind_out'][cc]['fac']|length + country['links_ind_out'][cc]['net']|length + country['links_ind_out'][cc]['ix']|length, 1) %}
+                    {% for key in country['links_ind_out'][cc] %}
+                        {% for val in country['links_ind_out'][cc][key] %}
+                            {%- filter spaceless -%}
+                                {{ item_link(cc, key, val) }}
+                            {% endfilter %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endcall %}
+            {% endfor %}
+            </ul>
+        {% endcall %}
+
+        {% call list_item_collapse('id_collapse_incind', 'Indirect Links Incoming', country['links_ind_inc']|length) %}
+            <ul class="list-group">
+            {% for cc in country['links_ind_inc']|sort %}
+                {% call list_item_collapse('id_collapse_incind_' + loop.index|string, flag_24(cc) + db['countries'][cc]['name'], country['links_ind_inc'][cc]['fac']|length + country['links_ind_inc'][cc]['net']|length + country['links_ind_inc'][cc]['ix']|length, 1) %}
+                    {% for key in country['links_ind_inc'][cc] %}
+                        {% for val in country['links_ind_inc'][cc][key] %}
+                            {%- filter spaceless -%}
+                                {{ item_link(cc, key, val) }}
+                            {% endfilter %}
+                        {% endfor %}
+                    {% endfor %}
+                {% endcall %}
+            {% endfor %}
+            </ul>
+        {% endcall %}
+
+
+        <li class="list-group-item">
+            <label class="custom-control custom-checkbox mb-0">
+                <input type="checkbox" class="custom-control-input" checked onchange="$('#id_map .bubbles [data-info*=facility]').toggle();">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Show Facilities</span>
+            </label>
+            <label class="custom-control custom-checkbox mb-0">
+                <input type="checkbox" class="custom-control-input" checked onchange="$('#id_map .bubbles [data-info*=landing]').toggle();">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Show Landings</span>
+            </label>
+            <label class="custom-control custom-checkbox mb-0">
+                <input type="checkbox" class="custom-control-input" checked onchange="$('#id_map .arc [data-info*=dirlink]').toggle();">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Show Direct Links</span>
+            </label>
+            <label class="custom-control custom-checkbox mb-0">
+                <input type="checkbox" class="custom-control-input" checked onchange="$('#id_map .arc [data-info*=indlink]').toggle();">
+                <span class="custom-control-indicator"></span>
+                <span class="custom-control-description">Show Indirect Links</span>
+            </label>
+        </li>
+
+    </ul>
+</div>
+{% endfilter %}
+{% endblock %}
+

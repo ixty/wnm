@@ -1,0 +1,257 @@
+{% from "tools.html" import flag_24 with context %}
+{% from "help.html"  import help    with context %}
+
+{% macro active_pagename(val) -%}
+    {% if page.pagename == val %}
+        active
+    {% endif %}
+{%- endmacro %}
+
+
+<!doctype html>
+<html>
+    <head>
+        <!-- basic functionality -->
+        <meta charset="utf-8">
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="HandheldFriendly" content="true" />
+
+        <!-- customization -->
+        <title>World Net Map</title>
+        <meta content="ixty" name="Author">
+        <meta content="World Net Map" name="Desciption">
+        <meta content="internet,map,networks,bgp routes,internet exchange,as" name="Keywords" >
+        <link id="favicon" rel="shortcut icon" type="image/png" href="/res/favicon.png" />
+
+        <!-- all javascript -->
+        <script src="/res/d3.v3.min.js"></script>
+        <script src="/res/topojson.v1.min.js"></script>
+        <!-- <script src="/res/datamaps.world.min.js"></script> -->
+        <script src="/res/datamaps.world.hires.min.js"></script>
+
+        <script src="/res/jquery-3.2.1.min.js"></script>
+        <script src="/res/popper.min.js"></script>
+        <script src="/res/bootstrap.min.js"></script>
+        <script src="/res/sprintf.min.js"></script>
+
+        <!-- all css -->
+        <link rel="stylesheet" href="/res/bootstrap.min.css">
+        <link rel="stylesheet" href="/res/flaticon.css">
+        <link rel="stylesheet" href="/res/flags.min.css">
+
+        <style>
+body {
+    background-color: {{ colors['bg_body'] }};
+}
+
+.ovfy {
+    overflow-y: auto;
+}
+
+.ovf {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.linone {
+    list-style-type: none;
+}
+
+.list-group-item {
+    padding: .4rem 1rem;
+}
+
+.overlay {
+    height: 100%;
+    width: 100%;
+    display: none;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    overflow-y: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0, 0.75);
+}
+
+        </style>
+
+    </head>
+
+    <body>
+
+        <!-- navigation bar -->
+        <nav id="id_nav" class="navbar navbar-expand-lg navbar-light bg-light" style="/*background-color: {{ colors['bg_header'] }};*/">
+            <span>
+                <a class="navbar-brand" href="/ranks/world">
+                    <button class="btn btn-outline-success">
+                        <img src="/res/favicon.png" height="24px" >
+                        World Internet Map
+                    </button>
+                </a>
+
+                <a class="navbar-brand">
+                    <button class="btn btn-outline-secondary" onclick="$('#id_overlay').show();">
+                        <div class="d-block d-md-none">
+                            ?
+                        </div>
+                        <div class="d-none d-md-inline">
+                            Help
+                        </div>
+                    </button>
+                </a>
+            </span>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#id_nav_content" aria-controls="id_nav_content" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="id_nav_content">
+
+                <ul class="navbar-nav mr-auto">
+
+                    <li class="nav-item dropdown {{ active_pagename('ranks') }}">
+                        <a class="nav-link dropdown-toggle" href="#" id="id_dd_world" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="flaticon-earth"></i>
+                            World
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="id_dd_world">
+                            <a class="dropdown-item" href="/ranks/nets_loc" >Networks (AS)</a>
+                            <a class="dropdown-item" href="/ranks/nets_ext" >External Networks (AS)</a>
+                            <a class="dropdown-item" href="/ranks/num_fac"  >Facilities</a>
+                            <a class="dropdown-item" href="/ranks/num_ix"   >Exchanges (IX)</a>
+                            <a class="dropdown-item" href="/ranks/landings" >Landings (backbones)</a>
+                            <a class="dropdown-item" href="/ranks/addr4"    >IPv4 Addresses</a>
+                            <a class="dropdown-item" href="/ranks/addr6"    >IPv6 Addresses</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown {{ active_pagename('country') }}">
+                        <a class="nav-link dropdown-toggle" href="#" id="id_dd_cns" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="flaticon-flag1"></i>
+                            Country
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="id_dd_cns">
+                            <a class="dropdown-item" href="/country/us">{{ flag_24('us') }} United States of America</a>
+                            <a class="dropdown-item" href="/country/de">{{ flag_24('de') }} Germany</a>
+                            <a class="dropdown-item" href="/country/au">{{ flag_24('au') }} Australia</a>
+                            <a class="dropdown-item" href="/country/ca">{{ flag_24('ca') }} Canada</a>
+                            <a class="dropdown-item" href="/country/fr">{{ flag_24('fr') }} France</a>
+                            <a class="dropdown-item" href="/country/br">{{ flag_24('br') }} Brazil</a>
+                            <a class="dropdown-item" href="/country/in">{{ flag_24('in') }} India</a>
+                            <a class="dropdown-item" href="/country/ru">{{ flag_24('ru') }} Russian Federation</a>
+                            <a class="dropdown-item" href="/country/gb">{{ flag_24('gb') }} United Kingdom</a>
+                            <a class="dropdown-item" href="/country/jp">{{ flag_24('jp') }} Japan</a>
+                            <a class="dropdown-item" href="/country/nl">{{ flag_24('nl') }} Netherlands</a>
+
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item disabled" href="#" >use search for more</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown {{ active_pagename('net') }}">
+                        <a class="nav-link dropdown-toggle" href="#" id="id_dd_nets" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="flaticon-network2"></i>
+                            Network
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="id_dd_nets">
+                            <a class="dropdown-item" href="/net/15169"> <i class="flaticon-network2"></i> Google    </a>
+                            <a class="dropdown-item" href="/net/714"  > <i class="flaticon-network2"></i> Apple     </a>
+                            <a class="dropdown-item" href="/net/32934"> <i class="flaticon-network2"></i> Facebook  </a>
+                            <a class="dropdown-item" href="/net/16509"> <i class="flaticon-network2"></i> Amazon    </a>
+                            <a class="dropdown-item" href="/net/5511" > <i class="flaticon-network2"></i> Orange    </a>
+                            <a class="dropdown-item" href="/net/13335"> <i class="flaticon-network2"></i> Cloudflare</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item disabled" href="#" >use search for more</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown {{ active_pagename('cable') }}">
+                        <a class="nav-link dropdown-toggle" href="#" id="id_dd_nets" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="flaticon-pipe1"></i>
+                            Cables
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="id_dd_nets">
+                            <a class="dropdown-item" href="/cable/1031"> <i class="flaticon-pipe1"></i> SeaMeWe-3   </a>
+                            <a class="dropdown-item" href="/cable/1592"> <i class="flaticon-pipe1"></i> EAC-C2C     </a>
+                            <a class="dropdown-item" href="/cable/1009"> <i class="flaticon-pipe1"></i> SCCN        </a>
+                            <a class="dropdown-item" href="/cable/1027"> <i class="flaticon-pipe1"></i> FEA         </a>
+                            <a class="dropdown-item" href="/cable/1629"> <i class="flaticon-pipe1"></i> ACE         </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item disabled" href="#" >use search for more</a>
+                        </div>
+                    </li>
+
+                </ul>
+
+                <div class="form-inline dropdown">
+                    <div class="" href="#" id="id_dd_search" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <input id="id_search" class="form-control mr-sm-2" type="search" placeholder="Search" onclick="event.stopPropagation();">
+                        <button class="btn btn-outline-primary">Search</button>
+                    </div>
+                    <a class="btn btn-outline-success ml-2" href="/data">Data</a>
+                        <div id="id_search_res" class="dropdown-menu" aria-labelledby="id_dd_search">
+                        <a class="dropdown-item disabled" href="#">No Result</a>
+                    </div>
+                </div>
+
+                <script>
+                    var search_timeout = null;
+
+                    function do_search()
+                    {
+                        var val = $("#id_search").val().trim();
+                        if(val.length >= 2 )
+                        {
+                            $('#id_search_res').load("/search/" + val, function (resp, stat)
+                            {
+                                if(stat == 'success')
+                                {
+                                    if($('#id_search_res').is(":hidden"))
+                                        $('#id_dd_search').dropdown('toggle');
+                                }
+                                else
+                                {
+                                    if(!$('#id_search_res').is(":hidden"))
+                                        $('#id_dd_search').dropdown('toggle');
+                                }
+                            });
+                        }
+                        else
+                            if(!$('#id_search_res').is(":hidden"))
+                                $('#id_dd_search').dropdown('toggle');
+                    }
+
+                    function do_search_timeout()
+                    {
+                        if(search_timeout)
+                            clearTimeout(search_timeout);
+                        search_timeout = setTimeout(do_search, 333);
+                    }
+                    $("#id_search").change(do_search_timeout);
+                    $("#id_search").keyup(do_search_timeout);
+                </script>
+            </div>
+        </nav>
+
+        <!-- main layout -->
+        {% block content %}
+        {% endblock %}
+
+        <!-- help overlay -->
+        <div id="id_overlay" class="overlay">
+            {{ help() }}
+
+            <script>
+                $(document).keyup(function(e) {
+                    if(e.keyCode == 27)
+                        $('#id_overlay').hide();
+                });
+            </script>
+        </div>
+
+
+    </body>
+</html>
+

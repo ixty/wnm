@@ -1,0 +1,63 @@
+{% extends "map.html" %}
+
+{% from "tools.html" import flag_24             with context %}
+{% from "tools.html" import flag_32             with context %}
+{% from "tools.html" import list_item_collapse  with context %}
+{% from "tools.html" import item_facility       with context %}
+
+
+<!-- display info for an exchange -->
+{% block sidebar %}
+{% filter stripblock %}
+<div>
+    <h3>
+        <i class="flaticon-interconnect"></i>
+        {{ flag_32(ix['country']) }}
+        {{ ix['name'] }}
+    </h3>
+
+    <ul class="list-group">
+        <li class="list-group-item">
+            {{ ix['city'] }}, {{ ix['country'] }}
+
+            {% if ix['website']|length %}
+                <br/><a href="{{ ix['website'] }}">{{ ix['website'] }}</a>
+            {% endif %}
+        </li>
+
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            Total Bandwith
+            <span class="badge badge-primary badge-pill"> {{ ix['bandwith']|bandwith }}</span>
+        </li>
+
+        {% call list_item_collapse('id_col_facs', 'Facilities', ix['facilities']|length) %}
+            {% for fid in ix['facilities'] %}
+                {%- filter spaceless -%}
+                    {{ item_facility(db['facilities'][fid|string]) }}
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+
+        {% call list_item_collapse('id_col_nets', 'Networks', ix['nets']|length) %}
+            {% for asn in ix['nets'] %}
+                {%- filter spaceless -%}
+                    <div class="ovf row">
+                        <a href="/net/{{ asn }}">
+                            <span class="badge badge-secondary badge-pill" style="width: 60px;">
+                                {{ ix['speeds'][asn|string]|bandwith2 }}
+                            </span>
+                            {{ flag_24(db['nets'][asn]['cc']) }}
+                            {% if db['nets'][asn]['name']|length %}
+                                {{ db['nets'][asn]['name'] }}
+                            {% else %}
+                                AS{{ asn }}
+                            {% endif %}
+                        </a>
+                    </div>
+                {% endfilter %}
+            {% endfor %}
+        {% endcall %}
+    </ul>
+</div>
+{% endfilter %}
+{% endblock %}

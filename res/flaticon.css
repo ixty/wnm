@@ -1,0 +1,60 @@
+	/*
+  	Flaticon icon font: Flaticon
+  	Creation date: 20/12/2017 11:54
+  	*/
+
+@font-face {
+  font-family: "Flaticon";
+  src: url("./Flaticon.eot");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff") format("woff"),
+       url("./Flaticon.ttf") format("truetype"),
+       url("./Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./Flaticon.svg#Flaticon") format("svg");
+  }
+}
+
+[class^="flaticon-"]:before, [class*=" flaticon-"]:before,
+[class^="flaticon-"]:after, [class*=" flaticon-"]:after {
+    font-family: Flaticon;
+    font-size: 20px;
+    font-style: normal;
+    padding-left: 2px;
+    padding-right: 2px;
+    vertical-align: middle;
+}
+
+.flaticon-caret-down:before { content: "\f100"; font-size: 12px; }
+.flaticon-caret-right:before { content: "\f101"; font-size: 12px; }
+.flaticon-anchor:before { content: "\f102"; }
+.flaticon-flag2:before { content: "\f103"; }
+.flaticon-cloud-up:before { content: "\f104"; }
+.flaticon-cloud-down:before { content: "\f105"; }
+.flaticon-building:before { content: "\f106"; }
+.flaticon-cloud-exchange:before { content: "\f107"; }
+.flaticon-city:before { content: "\f108"; }
+.flaticon-network3:before { content: "\f109"; }
+.flaticon-interconnect:before { content: "\f10a"; }
+.flaticon-submarine:before { content: "\f10b"; }
+.flaticon-flag1:before { content: "\f10c"; }
+.flaticon-factory:before { content: "\f10d"; }
+.flaticon-mesh:before { content: "\f10e"; }
+.flaticon-network2:before { content: "\f10f"; }
+.flaticon-address:before { content: "\f110"; }
+.flaticon-internet:before { content: "\f111"; }
+.flaticon-pipe1:before { content: "\f112"; }
+.flaticon-deal2:before { content: "\f113"; }
+.flaticon-deal1:before { content: "\f114"; }
+.flaticon-office:before { content: "\f115"; }
+.flaticon-cloud-net:before { content: "\f116"; }
+.flaticon-cable:before { content: "\f117"; }
+.flaticon-analytics:before { content: "\f118"; }
+.flaticon-network1:before { content: "\f119"; }
+.flaticon-earth:before { content: "\f11a"; }

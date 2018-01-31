@@ -1,0 +1,38 @@
+{% from "tools.html" import flag_24 with context %}
+
+{% if search_res|length > 0 %}
+    {% filter stripblock %}
+        {% for r in search_res %}
+            {%- filter spaceless -%}
+            <a href="{{ r['path'] }}" class="dropdown-item">
+                {% if r['type'] == 'net' %}
+                    <i class="flaticon-network2"></i>
+                    {{ flag_24(r['cc']) }}
+                {% elif r['type'] == 'country' %}
+                    <i class="flaticon-flag1"></i>
+                    {{ flag_24(r['cc']) }}
+                {% elif r['type'] == 'facility' %}
+                    <i class="flaticon-city"></i>
+                    {{ flag_24(r['cc']) }}
+                {% elif r['type'] == 'ix' %}
+                    <i class="flaticon-interconnect"></i>
+                    {{ flag_24(r['cc']) }}
+                {% elif r['type'] == 'landing' %}
+                    <i class="flaticon-anchor"></i>
+                    {{ flag_24(r['cc']) }}
+                {% elif r['type'] == 'cable' %}
+                    <i class="flaticon-pipe1"></i>
+                {% endif %}
+
+                {% if r['type'] == 'net' and r['name']|length <= 0 %}
+                    AS{{ r['path'][5:] }}
+                {% else %}
+                    {{ r['name'] }}
+                {% endif %}
+            </a>
+            {% endfilter %}
+        {% endfor %}
+    {% endfilter %}
+{% else %}
+    <a class="dropdown-item disabled" href="#">No Result</a>
+{% endif %}
