@@ -218,6 +218,12 @@
                         };
                     }
 
+                    // ios safari..
+                    var ua = window.navigator.userAgent;
+                    var iOS = !!ua.match(/iPad/i) || !!ua.match(/iPhone/i);
+                    var webkit = !!ua.match(/WebKit/i);
+                    var iOSSafari = iOS && webkit && !ua.match(/CriOS/i);
+
                     var datamap_opts =
                     {
                         scope:          'world',
@@ -232,7 +238,7 @@
                             borderOpacity:          1,
                             borderColor:            cn_border,
                             popupTemplate:          _on_hover_geo,
-                            popupOnHover:           true,
+                            popupOnHover:           !iOSSafari,
                             highlightOnHover:       true,
                             highlightFillColor:     cn_selected,
                             highlightBorderColor:   'rgba(255, 255, 255, 0.2)',
@@ -242,9 +248,9 @@
                             borderWidth:            1,
                             borderOpacity:          1,
                             borderColor:            '#FFFFFF',
-                            popupOnHover:           true,
                             radius:                 null,
                             popupTemplate:          _on_hover_bub,
+                            popupOnHover:           !iOSSafari,
                             fillOpacity:            0.40,
                             animate:                true,
                             highlightOnHover:       true,
