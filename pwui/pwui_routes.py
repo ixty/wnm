@@ -21,9 +21,15 @@ class cached(object):
     def __call__(self, func):
         def decorator(*args, **kwargs):
             if main.cache_enabled:
+                # clear cache if memory usage is too high
+                if get_mem_usage() >= 75.0:
+                    self.cache = {}
+
+                # lookup cache
                 if flask.request.path in self.cache:
                     return self.cache[flask.request.path]
 
+                # not in cache, add it
                 self.cache[flask.request.path] = func(*args, **kwargs)
                 return self.cache[flask.request.path]
             else:

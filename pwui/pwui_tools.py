@@ -1,7 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
-import math, ipaddress
+import os, math, ipaddress
 from pwui_colors import pwui_colors
+
+# returns % of non-available memory
+def get_mem_usage():
+    with os.popen('free -b') as p:
+        for l in p.readlines():
+            if l.lower()[0:3] != 'mem':
+                continue
+            tmp = l.split()
+            tot = float(tmp[1])
+            if len(tmp) >= 7:
+                return (tot - float(tmp[6])) / tot * 100.0
+            return float(tmp[2]) / tot * 100.0
+        return -1
 
 # =========================================================================== #
 # ip lookup tools (ip to ASn)

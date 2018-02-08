@@ -30,7 +30,25 @@ $ source venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
+## run server
+
+In debug mode (default), the default bound address is `127.0.0.1:5000`, flask is used as a webserver, templates are automatically reloaded and there is no cache on pages.
+
+```shell
+$ source venv/bin/activate
+$ ./pwui/pwui.py
+```
+
+The default bound address is `0.0.0.0:80` in release mode, which may requires root acess.
+
+```shell
+$ source venv/bin/activate
+$ ./pwui/pwui.py release
+```
+
 ## regenerate databases
+
+If you didnt clone the repository recursively, you need to regenerate the database.
 
 ### automated update
 If you want to generate or update the database used by WNM, you can use the following command:
@@ -241,20 +259,6 @@ data to be processed 3
 
 </details>
 
-## run server
-The default bound address is `0.0.0.0:80` in release mode, which may requires root acess.
-```shell
-$ source venv/bin/activate
-$ ./pwui/pwui.py
-```
-
-### debug mode
-In debug mode, the default bound address is `127.0.0.1:5000`, flask is used as a webserver, templates are automatically reloaded and there is no cache on pages.
-
-```shell
-$ source venv/bin/activate
-$ DEBUG=1 ./pwui/pwui.py
-```
 
 ## data sources
 This is the list of all "data-raw" files that we use as data sources for WNM.
