@@ -18,7 +18,8 @@ with gzip.open('./data/final.json.gz', 'rb') as f:
     db = json.load(f)
 
 # options
-cache_enabled = not debug
+# cache_enabled = not debug
+cache_enabled = False
 
 # init flask app
 print('> starting web server on %s:%d' % (addr, port))

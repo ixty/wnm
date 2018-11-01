@@ -15,6 +15,12 @@
 
     <ul class="list-group">
 
+        {% if not cable['ready'] %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Status
+                <span class="badge badge-danger badge-pill">Not Yet Active</span>
+            </li>
+        {% endif %}
 
         {% if cable['url']|length > 0 %}
             <li class="list-group-item">

@@ -93,7 +93,13 @@
     <div class="">
         <a href="/cable/{{ c['id'] }}">
             <i class="flaticon-pipe1" style="color: black;"></i>
+            {% if not c['ready'] %}
+                <del>
+            {% endif %}
             {{ '(%d) %s' % (c['landings']|length, c['name']) }}
+            {% if not c['ready'] %}
+                </del>
+            {% endif %}
         </a>
     </div>
 {% endmacro %}

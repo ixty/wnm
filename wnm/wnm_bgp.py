@@ -68,7 +68,10 @@ def bgp_download_all():
 def bgp_load(path):
     pop = Popen([path_bin_bgpdump, '-m', path], stdout=PIPE, stderr=PIPE)
     data = pop.stdout.read()
-    pop.kill()
+    try:
+        pop.kill()
+    except:
+        pass
     return data
 
 def bgp_build(asl, ix):

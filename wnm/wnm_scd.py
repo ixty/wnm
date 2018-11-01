@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-import sys, os, json, re, glob
+import sys, os, json, re, glob, datetime
 from wnm_utils import *
 
 # submarine cable database
@@ -104,6 +104,25 @@ def scd_rebuild():
         while own.find('  ') >= 0:
             own = own.replace('  ', ' ')
         c['owners']     = own.split(', ')
+
+        # is cable ready for service?
+        month = ca['rfs'].split(' ')[-2] if len(ca['rfs'].split(' ')) > 1 else 'December'
+        months = { 'January':1, 'February':2, 'March':3, 'April':4, 'May':5, 'June':6, 'July':7, 'August':8, 'September':9, 'October':10, 'November':11, 'December':12, 'Q1':3, 'Q2':6, 'Q3':9, 'Q4': 12 }
+        if month not in months.keys():
+            month = 'December'
+        try:
+            m = months[month]
+            y = int(c['rfs'])
+            today = datetime.date.today()
+
+            if today.year > y:
+                c['ready'] = 1
+            elif today.year < y:
+                c['ready'] = 0
+            else:
+                c['ready'] = 1 if m < today.month else 0
+        except:
+            c['ready'] = 0
 
         cables[cid] = c
 
