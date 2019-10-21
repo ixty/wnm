@@ -28,4 +28,4 @@ tqdm==4.19.4
 twentyc.rpc==0.3.5
 Unidecode==0.4.21
 urllib3==1.22
-Werkzeug==0.12.2
+Werkzeug==0.15.3
